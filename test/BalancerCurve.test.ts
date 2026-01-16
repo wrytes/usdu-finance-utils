@@ -81,6 +81,7 @@ describe('BalancerCurve', function () {
 				console.log('  LP Added:', parsedEvent?.args[1].toString());
 				console.log('  LP Removed (USDU):', parsedEvent?.args[2].toString());
 				console.log('  USDC Swapped:', parsedEvent?.args[3].toString());
+				console.log('  Revenue (Profit):', parsedEvent?.args[4].toString());
 			}
 		});
 	});

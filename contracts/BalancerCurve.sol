@@ -24,7 +24,7 @@ contract BalancerCurve is Ownable, IMorphoFlashLoanCallback {
 	IERC20 private usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
 	// events
-	event Balanced(uint256 flashLoan, uint256 added, uint256 removed, uint256 swapped);
+	event Balanced(uint256 flashLoan, uint256 added, uint256 removed, uint256 swapped, uint256 revenue);
 
 	// errors
 	error NotMorpho();
@@ -52,8 +52,12 @@ contract BalancerCurve is Ownable, IMorphoFlashLoanCallback {
 		usdu.approve(address(pool), receivedUSDU);
 		uint256 receivedUSDC = pool.exchange(1, 0, receivedUSDU, assets);
 
-		usdc.approve(address(morpho), assets);
+		if (receivedUSDC <= assets) revert Invalid();
+		uint256 revenue = receivedUSDC - assets;
 
-		emit Balanced(assets, receivedLP, receivedUSDU, receivedUSDC);
+		usdc.approve(address(morpho), assets);
+		usdc.transfer(owner(), revenue);
+
+		emit Balanced(assets, receivedLP, receivedUSDU, receivedUSDC, revenue);
 	}
 }
