@@ -7,6 +7,8 @@ export const ADDRESS: ChainAddressMap = {
 		// identifier
 		chainId: 1,
 		chainSelector: '5009297550715157269',
+
+		dao: '0x5f238e89F3ba043CF202E1831446cA8C5cd40846',
 	},
 	[polygon.id]: {
 		// identifier

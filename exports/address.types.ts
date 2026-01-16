@@ -49,6 +49,8 @@ export type ChainAddressMainnet = {
 	// identifier
 	chainId: typeof mainnet.id;
 	chainSelector: string;
+
+	dao: Address;
 };
 
 export type ChainAddressPolygon = {
