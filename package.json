@@ -76,6 +76,7 @@
 		"@typechain/ethers-v6": "^0.5.1",
 		"@typechain/hardhat": "^9.1.0",
 		"@types/node": "^24.0.1",
+		"@usdu-finance/usdu-core": "^0.0.7",
 		"typechain": "^8.3.2",
 		"typescript": "^5.8.3"
 	}

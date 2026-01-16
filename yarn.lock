@@ -1615,6 +1615,17 @@
   dependencies:
     "@types/node" "*"
 
+"@usdu-finance/usdu-core@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@usdu-finance/usdu-core/-/usdu-core-0.0.7.tgz#54d2f25083e013bd28dfc9eb3b7fefb81d7fabad"
+  integrity sha512-Xkc6SHEN7wrV4nspey2ftDEfHCAOoOWLsA+dbVUOMHPHNA89bbpfZS3/TVnbZhlXIpOldk43WhNh4FP4M99msg==
+  dependencies:
+    "@typechain/ethers-v6" "^0.5.1"
+    "@typechain/hardhat" "^9.1.0"
+    "@types/node" "^24.0.1"
+    typechain "^8.3.2"
+    typescript "^5.8.3"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
