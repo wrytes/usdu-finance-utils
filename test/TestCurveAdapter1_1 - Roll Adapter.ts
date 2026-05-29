@@ -2,9 +2,10 @@ import { expect } from 'chai';
 import { ethers, network } from 'hardhat';
 import { ICurveAdapterV1_1, ICurveStableSwapNG, IERC20, Stablecoin } from '../typechain';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
-import { parseEther, parseUnits, zeroAddress } from 'viem';
+import { formatUnits, parseEther, parseUnits, zeroAddress } from 'viem';
 import { ADDRESS } from '@usdu-finance/usdu-core';
 import { mainnet } from 'viem/chains';
+import { evm_increaseTime } from './helper';
 
 const addr = ADDRESS[mainnet.id];
 
@@ -46,7 +47,7 @@ describe('ICurveAdapterV1_1: Stablecoin Integration Tests', function () {
 				{
 					forking: {
 						jsonRpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_RPC_KEY}`,
-						blockNumber: 24244916, // Set your desired block number here
+						blockNumber: 24246990, // Set your desired block number here
 					},
 				},
 			],
@@ -73,32 +74,35 @@ describe('ICurveAdapterV1_1: Stablecoin Integration Tests', function () {
 		// Fund user with USDC
 		await usdc.connect(usdcUser).transfer(user.address, parseUnits(HUGE_AMOUNT, 6));
 
+		// Register module to fund USDU
+		await stable.connect(curator).setModule(module, 9999999999999, 'Module');
+		await evm_increaseTime(3600 * 24 * 10);
+		await stable.connect(curator).acceptModule(module);
+		await stable.connect(module).mintModule(user.address, parseUnits(HUGE_AMOUNT, 18));
+
 		// show init details
 		await showDetails();
 	});
 
-	describe('Remove Liquidity Tests', function () {
-		it('User adds USDC liquidity directly via the pool', async function () {
-			await usdc.connect(user).approve(pool, parseUnits(TRADE_AMOUNT, 6));
-			await pool.connect(user)['add_liquidity(uint256[],uint256)']([parseUnits(TRADE_AMOUNT, 6), 0n], 0n);
-
+	describe('Roll Adapter Tests', function () {
+		it('User adds liquidity to simulate symmetric input from new adapter', async function () {
+			await usdc.connect(user).approve(pool, parseUnits(HUGE_AMOUNT, 6));
+			await stable.connect(user).approve(pool, parseUnits(HUGE_AMOUNT, 18));
+			await pool
+				.connect(user)
+				['add_liquidity(uint256[],uint256)']([parseUnits(HUGE_AMOUNT, 6), parseUnits(HUGE_AMOUNT, 18)], 0n);
 			await showDetails();
 		});
 
-		it('User removes LP with adapter', async function () {
-			const userLP = await pool.balanceOf(user);
+		it('Curator redeems liquidity', async function () {
+			const balanceBefore = await stable.balanceOf(curator);
+			const adapterLP = await pool.balanceOf(adapter);
 
-			await pool.connect(user).approve(adapter, userLP);
-			await adapter.connect(user).removeLiquidity(userLP, 0n);
+			await adapter.connect(curator).redeem(adapterLP, 0n);
 
-			await showDetails();
-		});
+			const balanceAfter = await stable.balanceOf(curator);
 
-		it('User swaps received USDU to USDC, regardless the imbalance', async function () {
-			const userUSDU = await stable.balanceOf(user);
-
-			await stable.connect(user).approve(pool, userUSDU);
-			await pool.connect(user)['exchange(int128,int128,uint256,uint256)'](1n, 0n, userUSDU, 0n);
+			console.log('Revenue', formatUnits(balanceAfter - balanceBefore, 18));
 
 			await showDetails();
 		});
